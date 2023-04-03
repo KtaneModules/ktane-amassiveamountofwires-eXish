@@ -147,7 +147,7 @@ public class MassiveAmountOfWiresScript : MonoBehaviour {
                     yield return "unsubmittablepenalty";
                     yield break;
                 }
-                for (int j = 1; j < wireCols.Length; j++)
+                for (int j = 0; j < wireCols.Length; j++)
                 {
                     if (!wireCut[j] && wireCols[j] == index)
                     {
