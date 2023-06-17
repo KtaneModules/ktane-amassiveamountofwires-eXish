@@ -23,11 +23,11 @@ MonoBehaviour:
     PDF: https://ktane.timwi.de/PDF/A%20Massive%20Amount%20of%20Wires.pdf
 
 
-    A Massive Amount of Wires (aMassiveAmountOfWiresModule) v1.0.1
+    A Massive Amount of Wires (aMassiveAmountOfWiresModule) v1.0.3
 
     Module and Concept by eXish
 
     Twitch Plays supported'
-  version: 1.0.1
+  version: 1.0.3
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 3f920c729eacf1743a080577b2caad55, type: 3}

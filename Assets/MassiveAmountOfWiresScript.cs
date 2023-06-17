@@ -144,17 +144,26 @@ public class MassiveAmountOfWiresScript : MonoBehaviour {
                     index = Array.IndexOf(names, parameters[i].ToLowerInvariant());
                 if (!wireCols.Contains(index))
                 {
+                    yield return "sendtochat Attempted to cut a wire with color '" + names[index] + "' but no wires with this color exist!";
                     yield return "unsubmittablepenalty";
                     yield break;
                 }
+                bool success = false;
                 for (int j = 0; j < wireCols.Length; j++)
                 {
                     if (!wireCut[j] && wireCols[j] == index)
                     {
                         moduleSel.Children[j].OnInteract();
                         yield return new WaitForSeconds(.1f);
+                        success = true;
                         break;
                     }
+                }
+                if (!success)
+                {
+                    yield return "sendtochat Attempted to cut a wire with color '" + names[index] + "' but no uncut wires with this color are left!";
+                    yield return "unsubmittablepenalty";
+                    yield break;
                 }
             }
         }
