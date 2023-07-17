@@ -162,7 +162,7 @@ public class MassiveAmountOfWiresScript : MonoBehaviour {
                 if (!success)
                 {
                     yield return "sendtochat Attempted to cut a wire with color '" + names[index] + "' but no uncut wires with this color are left!";
-                    yield return "unsubmittablepenalty";
+                    yield return "awardpoints -1";
                     yield break;
                 }
             }
