@@ -118,42 +118,43 @@ public class MassiveAmountOfWiresScript : MonoBehaviour {
 
     //twitch plays
     #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} cut <color> [Cuts a wire with the specified color] | Cuts can be chained using spaces | Valid colors are Red, Orange, Yellow, Lime, Green, Jade, Cyan, Azure, Blue, Violet, Magenta, roSe, White, grEy, and blacK";
+    private readonly string TwitchHelpMessage = @"!{0} cut <color> <#> [Cuts a wire with the specified color # times, 1 if unspecified] | Cuts can be chained using semicolon(;) | Valid colors are Red, Orange, Yellow, Lime, Green, Jade, Cyan, Azure, Blue, Violet, Magenta, roSe, White, grEy, and blacK, using their full color name or their shorthands.";
     #pragma warning restore 414
     IEnumerator ProcessTwitchCommand(string command)
     {
-        string[] parameters = command.Split(' ');
-        if (Regex.IsMatch(parameters[0], @"^\s*cut\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
-        {
-            if (parameters.Length == 1)
+        command = command.Trim().ToLower();
+        Match m = Regex.Match(command, @"^cut\s*((?:\w+\s*[0-9]{0,2}\s*;*)(?:\s*\w+\s*[0-9]{0,2}\s*;*)*)$");
+
+        if (!m.Success)
+            yield break;
+
+        string[] parameters = m.Groups[1].Value.Trim().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] names = { "White", "Grey", "Black", "Red", "Orange", "Yellow", "Lime", "Green", "Jade", "Cyan", "Azure", "Blue", "Violet", "Magenta", "Rose" };
+        string[] namesShort = { "W", "E", "K", "R", "O", "Y", "L", "G", "J", "C", "A", "B", "V", "M", "S" };
+        foreach (string par in parameters)
+        {   //Validating string after 'cut'.
+            Match mp = Regex.Match(par, @"^\s*(\w+)\s*([0-9]{0,2})\s*");
+            string color = mp.Groups[1].Value.Trim();
+            color = char.ToUpper(color[0]) + color.Substring(1);
+            if (!mp.Success || (!names.Contains(color) && !namesShort.Contains(color))) 
                 yield break;
-            string[] names = { "white", "grey", "black", "red", "orange", "yellow", "lime", "green", "jade", "cyan", "azure", "blue", "violet", "magenta", "rose" };
-            string[] namesShort = { "w", "e", "k", "r", "o", "y", "l", "g", "j", "c", "a", "b", "v", "m", "s" };
-            for (int i = 1; i < parameters.Length; i++)
+        }
+        yield return null;
+        foreach (string par in parameters)
+        {   //Execute cuts
+            Match mp = Regex.Match(par, @"^\s*(\w+)\s*([0-9]{1,2})?\s*");
+            string color = mp.Groups[1].Value.Trim();
+            color = char.ToUpper(color[0]) + color.Substring(1);
+            int number = mp.Groups[2].Success ? int.Parse(mp.Groups[2].Value.Trim()) : 1;
+            int index = color.Length == 1 ? Array.IndexOf(namesShort, color) : Array.IndexOf(names, color);
+            for (int n = 0; n < number; n++)
             {
-                if (!names.Contains(parameters[i].ToLowerInvariant()) && !namesShort.Contains(parameters[i].ToLowerInvariant()))
-                    yield break;
-            }
-            yield return null;
-            for (int i = 1; i < parameters.Length; i++)
-            {
-                int index;
-                if (parameters[i].Length == 1)
-                    index = Array.IndexOf(namesShort, parameters[i].ToLowerInvariant());
-                else
-                    index = Array.IndexOf(names, parameters[i].ToLowerInvariant());
-                if (!wireCols.Contains(index))
+                bool success = false; 
+                for (int i = 0; i < wireCols.Length; i++)
                 {
-                    yield return "sendtochat Attempted to cut a wire with color '" + names[index] + "' but no wires with this color exist!";
-                    yield return "unsubmittablepenalty";
-                    yield break;
-                }
-                bool success = false;
-                for (int j = 0; j < wireCols.Length; j++)
-                {
-                    if (!wireCut[j] && wireCols[j] == index)
+                    if (!wireCut[i] && wireCols[i] == index)
                     {
-                        moduleSel.Children[j].OnInteract();
+                        moduleSel.Children[i].OnInteract();
                         yield return new WaitForSeconds(.1f);
                         success = true;
                         break;
@@ -161,7 +162,7 @@ public class MassiveAmountOfWiresScript : MonoBehaviour {
                 }
                 if (!success)
                 {
-                    yield return "sendtochat Attempted to cut a wire with color '" + names[index] + "' but no uncut wires with this color are left!";
+                    yield return "sendtochat Attempted to cut a " + names[index] + " wire but no uncut " + names[index] + " wires are left!";
                     yield return "awardpoints -1";
                     yield break;
                 }
